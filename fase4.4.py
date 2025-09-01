@@ -28,14 +28,14 @@ antecedentes familiares y análisis de texto.
 @st.cache_data
 def cargar_datos():
     try:
-        tabla_antecedentes = pd.read_csv("data/tabla_genetico.csv")
-        tabla_demografica = pd.read_csv("data/tabla_demografica.csv")
-        tabla_orientacion_sexual = pd.read_csv("data/tabla_social.csv")
+        tabla_antecedentes = pd.read_csv("tablas/tabla_genetico.csv")
+        tabla_demografica = pd.read_csv("tablas/tabla_demografica.csv")
+        tabla_orientacion_sexual = pd.read_csv("tablas/tabla_social.csv")
 
         
         # Cargar datos para el modelo de ML
-        si = pd.read_csv("data/clean_d_tweets.csv")
-        no = pd.read_csv("data/clean_non_d_tweets.csv")
+        si = pd.read_csv("tablas/clean_d_tweets.csv")
+        no = pd.read_csv("tablas/clean_non_d_tweets.csv")
         
         si2 = si[['id', 'tweet']].copy()
         si2['etiqueta'] = 1
