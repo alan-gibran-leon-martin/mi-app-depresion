@@ -10,13 +10,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from supabase import create_client, Client
 from cryptography.fernet import Fernet
 
-
-FERNET_KEY = st.secrets["FERNET_KEY"].encode()
-cipher = Fernet(FERNET_KEY)
-
+# Configuración de Supabase y Fernet
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+FERNET_KEY = st.secrets["FERNET_KEY"].encode()
+
+cipher = Fernet(FERNET_KEY)
 
 # Configuración de la página
 st.set_page_config(
@@ -318,10 +317,7 @@ def main():
                 """)
             
             # Botón para guardar resultados
-            # Conexión
-            url = "https://ziwobirnrwkaxnokaexm.supabase.co"
-            key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppd29iaXJucndrYXhub2thZXhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNjQ4NzMsImV4cCI6MjA3NDc0MDg3M30.HyN5Xo6zNRAwb4MRthMRabkC-o62IcBLorrVqm78m_s"
-            supabase: Client = create_client(url, key)
+            supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
             
             curp_encriptado = cipher.encrypt(curp.encode()).decode()
             
