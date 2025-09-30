@@ -9,13 +9,14 @@ from sklearn.metrics import classification_report, accuracy_score
 from sklearn.feature_extraction.text import TfidfVectorizer
 from supabase import create_client, Client
 from cryptography.fernet import Fernet
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
-FERNET_KEY = os.getenv("FERNET_KEY").encode()
+FERNET_KEY = st.secrets["FERNET_KEY"].encode()
 cipher = Fernet(FERNET_KEY)
+
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Configuración de la página
 st.set_page_config(
