@@ -7,6 +7,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.feature_extraction.text import TfidfVectorizer
+from supabase import create_client, Client
+from cryptography.fernet import Fernet
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+FERNET_KEY = os.getenv("FERNET_KEY").encode()
+cipher = Fernet(FERNET_KEY)
 
 # Configuración de la página
 st.set_page_config(
@@ -19,9 +28,8 @@ st.set_page_config(
 # Título principal
 st.title("🧠 Sistema de Evaluación de Depresión")
 st.markdown("""
-Esta aplicación combina análisis bayesiano con procesamiento de lenguaje natural 
-para evaluar indicios de depresión basándose en información demográfica, 
-antecedentes familiares y análisis de texto.
+Esta aplicación combina análisis bayesiano con procesamiento de lenguaje natural para evaluar indicios de depresión 
+basándose en información demográfica, antecedentes familiares y análisis de texto.
 """)
 
 # Carga de datos
@@ -31,7 +39,6 @@ def cargar_datos():
         tabla_antecedentes = pd.read_csv("tablas/tabla_genetico.csv")
         tabla_demografica = pd.read_csv("tablas/tabla_demografica.csv")
         tabla_orientacion_sexual = pd.read_csv("tablas/tabla_social.csv")
-
         
         # Cargar datos para el modelo de ML
         si = pd.read_csv("tablas/clean_d_tweets.csv")
@@ -70,7 +77,7 @@ def datos_del_curp(curp: str):
             año += 2000
         else:
             año += 1900
-        
+            
         fecha = datetime(año, mes, dia)
         edad = (datetime.now() - fecha).days // 365
         
@@ -82,8 +89,7 @@ def datos_del_curp(curp: str):
 # Funciones para el cálculo bayesiano
 def prevalencia_demografica(sexo, edad, tabla_demografica):
     if edad in tabla_demografica['edad'].values:
-        filtro = tabla_demografica[(tabla_demografica['edad'] == edad) & 
-                                  (tabla_demografica['sexo'] == sexo)]
+        filtro = tabla_demografica[(tabla_demografica['edad'] == edad) & (tabla_demografica['sexo'] == sexo)]
         if not filtro.empty:
             return filtro['prob_base'].values[0]
     return 0.05  # valor por defecto
@@ -121,7 +127,11 @@ def bayes(p_base, LRs):
 @st.cache_resource
 def entrenar_modelo(total):
     X_train, X_test, y_train, y_test = train_test_split(
-        total['tweet'], total['etiqueta'], test_size=0.2, random_state=42, stratify=total['etiqueta']
+        total['tweet'], 
+        total['etiqueta'], 
+        test_size=0.2, 
+        random_state=42,
+        stratify=total['etiqueta']
     )
     
     vectorizer = TfidfVectorizer(max_features=5000, ngram_range=(1,2), min_df=2, max_df=0.9)
@@ -137,22 +147,19 @@ def entrenar_modelo(total):
 def main():
     # Cargar datos
     tabla_antecedentes, tabla_demografica, tabla_orientacion_sexual, total = cargar_datos()
-    
     if tabla_antecedentes is None:
         st.error("No se pudieron cargar los datos necesarios. Verifica las rutas de los archivos.")
         return
-    
+
     # Sidebar para entrada de datos
     with st.sidebar:
         st.header("📋 Información del Usuario")
         
         # Entrada de CURP
-        curp = st.text_input("Ingresa tu CURP:", max_chars=18, 
-                           help="El CURP debe tener 18 caracteres")
+        curp = st.text_input("Ingresa tu CURP:", max_chars=18, help="El CURP debe tener 18 caracteres")
         
         if curp:
             sexo, edad, fecha_nacimiento = datos_del_curp(curp)
-            
             if sexo and edad:
                 st.success(f"CURP válido: Sexo: {sexo}, Edad: {edad} años")
                 
@@ -166,10 +173,10 @@ def main():
         
         # Espaciador
         st.markdown("---")
-    
+
     # Contenido principal
     tab1, tab2, tab3 = st.tabs(["📊 Análisis Bayesiano", "📝 Análisis de Texto", "💾 Resultados"])
-    
+
     with tab1:
         st.header("Análisis Bayesiano de Riesgo")
         
@@ -180,7 +187,6 @@ def main():
             st.subheader("Preguntas de Evaluación")
             
             col1, col2 = st.columns(2)
-            
             with col1:
                 orientacion_sexual = st.radio(
                     "¿Te consideras heterosexual?",
@@ -188,7 +194,6 @@ def main():
                     index=0,
                     help="Selecciona tu orientación sexual"
                 )
-            
             with col2:
                 genetico = st.radio(
                     "¿Alguno de tus familiares en primer grado ha tenido depresión?",
@@ -211,13 +216,10 @@ def main():
                     
                     # Mostrar métricas
                     col1, col2, col3 = st.columns(3)
-                    
                     with col1:
                         st.metric("Prevalencia Base", f"{p_base:.4f}")
-                    
                     with col2:
                         st.metric("Likelihood Ratio Orientación", f"{lr_orientacion:.2f}")
-                    
                     with col3:
                         st.metric("Likelihood Ratio Genético", f"{lr_genetico:.2f}")
                     
@@ -237,7 +239,7 @@ def main():
                     st.session_state.resultado_bayes = resultado_bayes
                     st.session_state.orientacion_sexual = orientacion_sexual
                     st.session_state.genetico = genetico
-    
+
     with tab2:
         st.header("Análisis de Texto para Detección de Depresión")
         
@@ -267,12 +269,9 @@ def main():
                 
                 # Mostrar resultados
                 st.subheader("Resultados del Análisis de Texto")
-                
                 col1, col2 = st.columns(2)
-                
                 with col1:
                     st.metric("Probabilidad de Depresión", f"{proba:.4f}")
-                
                 with col2:
                     if proba >= 0.5:
                         st.error("El modelo detecta posibles indicios de depresión")
@@ -282,19 +281,16 @@ def main():
                 # Guardar resultado en session state
                 st.session_state.resultado_tweet = proba
                 st.session_state.texto_analizado = user_input
-    
+
     with tab3:
         st.header("Resultados Consolidados y Almacenamiento")
         
         if 'resultado_bayes' in st.session_state and 'resultado_tweet' in st.session_state:
             # Mostrar resultados consolidados
             st.subheader("Resumen de Resultados")
-            
             col1, col2 = st.columns(2)
-            
             with col1:
                 st.metric("Probabilidad Bayesiana", f"{st.session_state.resultado_bayes:.4f}")
-            
             with col2:
                 st.metric("Probabilidad por Texto", f"{st.session_state.resultado_tweet:.4f}")
             
@@ -317,31 +313,34 @@ def main():
             else:
                 st.error("""
                 **Alto riesgo**: Los resultados sugieren un riesgo alto de depresión. 
-                Se recomienda strongly consultar con un profesional de salud mental 
-                para una evaluación completa y apropiada.
+                Se recomienda strongly consultar con un profesional de salud mental para una evaluación completa y apropiada.
                 """)
             
             # Botón para guardar resultados
-            if st.button("Guardar Resultados en CSV", type="primary"):
-                registro = {
-                    "curp": curp,
-                    "orientacion_sexual": st.session_state.orientacion_sexual,
-                    "genetico": st.session_state.genetico,
-                    "resultado_bayes": st.session_state.resultado_bayes,
-                    "resultado_tweet": st.session_state.resultado_tweet,
-                    "texto_analizado": st.session_state.texto_analizado,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Conexión
+            url = "https://ziwobirnrwkaxnokaexm.supabase.co"
+            key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppd29iaXJucndrYXhub2thZXhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNjQ4NzMsImV4cCI6MjA3NDc0MDg3M30.HyN5Xo6zNRAwb4MRthMRabkC-o62IcBLorrVqm78m_s"
+            supabase: Client = create_client(url, key)
+            
+            curp_encriptado = cipher.encrypt(curp.encode()).decode()
+            
+            # Ejemplo de insertar datos
+            def guardar_resultados(curp_encriptado, orientacion, genetico, bayes, tweet, texto):
+                data = {
+                    "curp": curp_encriptado,
+                    "orientacion_sexual": orientacion,
+                    "genetico": genetico,
+                    "resultado_bayes": bayes,
+                    "resultado_tweet": tweet,
+                    "texto_analizado": texto,
                 }
-                
-                df = pd.DataFrame([registro])
-                try:
-                    # Intentar guardar en CSV
-                    ruta = "C:\\Users\\LENOVO\\Desktop\\arquitectura-ejercicio\\resultados_depresion.csv"
-                    df.to_csv(ruta, mode="a", index=False, 
-                             header=not pd.io.common.file_exists(ruta))
-                    st.success(f"Resultados guardados exitosamente en {ruta}")
-                except Exception as e:
-                    st.error(f"Error al guardar resultados: {e}")
+                supabase.table("resultados_depresion").insert(data).execute()
+            
+            if st.button("Guardar resultados en la base de datos"):
+                guardar_resultados(curp_encriptado, st.session_state.orientacion_sexual, st.session_state.genetico, 
+                                 st.session_state.resultado_bayes, st.session_state.resultado_tweet, 
+                                 st.session_state.texto_analizado)
+                st.success("✅ Resultados guardados en la base de datos")
         else:
             st.info("Complete ambos análisis (Bayesiano y de Texto) para ver los resultados consolidados.")
 
