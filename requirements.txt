@@ -2,6 +2,7 @@ streamlit==1.47.1
 pandas==2.2.3
 scikit-learn==1.7.1
 numpy==2.2.1
-supabase==2.4.0
+supabase==2.4.6
 cryptography==42.0.5
 python-dotenv==1.0.1
+
