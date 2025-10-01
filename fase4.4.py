@@ -334,10 +334,20 @@ def main():
                 supabase.table("resultados_depresion").insert(data).execute()
             
             if st.button("Guardar resultados en la base de datos"):
-                guardar_resultados(curp_encriptado, st.session_state.orientacion_sexual, st.session_state.genetico, 
-                                 st.session_state.resultado_bayes, st.session_state.resultado_tweet, 
-                                 st.session_state.texto_analizado)
-                st.success("✅ Resultados guardados en la base de datos")
+                if curp:
+                    curp_encriptado = cipher.encrypt(curp.encode()).decode()
+                    guardar_resultados(
+                        curp_encriptado,
+                        st.session_state.orientacion_sexual,
+                        st.session_state.genetico,
+                        st.session_state.resultado_bayes,
+                        st.session_state.resultado_tweet,
+                        st.session_state.texto_analizado
+                    )
+                    st.success("✅ Resultados guardados en la base de datos")
+                else:
+                    st.error("⚠️ No se ingresó CURP")
+
         else:
             st.info("Complete ambos análisis (Bayesiano y de Texto) para ver los resultados consolidados.")
 
