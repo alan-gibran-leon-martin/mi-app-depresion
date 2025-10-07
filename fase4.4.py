@@ -161,13 +161,13 @@ def main():
         if curp:
             sexo, edad, fecha_nacimiento = datos_del_curp(curp)
             if sexo and edad:
-                st.success(f"CURP válido: Sexo: {sexo}, Edad: {edad} años")
+                #st.success(f"CURP válido: Sexo: {sexo}, Edad: {edad} años")
                 
                 # Mostrar información demográfica
                 st.subheader("Información Demográfica")
-                st.info(f"Sexo: {'Masculino' if sexo == 'H' else 'Femenino'}")
-                st.info(f"Edad: {edad} años")
-                st.info(f"Fecha de nacimiento: {fecha_nacimiento.strftime('%d/%m/%Y')}")
+                #st.info(f"Sexo: {'Masculino' if sexo == 'H' else 'Femenino'}")
+                #st.info(f"Edad: {edad} años")
+                #st.info(f"Fecha de nacimiento: {fecha_nacimiento.strftime('%d/%m/%Y')}")
             else:
                 st.error("CURP inválido. Verifica el formato.")
         
@@ -214,18 +214,18 @@ def main():
                     # Mostrar resultados
                     st.subheader("Resultados del Análisis Bayesiano")
                     
-                    # Mostrar métricas
+                   """ # Mostrar métricas
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("Prevalencia Base", f"{p_base:.4f}")
                     with col2:
                         st.metric("Likelihood Ratio Orientación", f"{lr_orientacion:.2f}")
                     with col3:
-                        st.metric("Likelihood Ratio Genético", f"{lr_genetico:.2f}")
+                        st.metric("Likelihood Ratio Genético", f"{lr_genetico:.2f}")"""
                     
-                    # Mostrar probabilidad final con barra de progreso
+                   """ # Mostrar probabilidad final con barra de progreso
                     st.metric("Probabilidad Final de Riesgo", f"{resultado_bayes:.4f}")
-                    st.progress(float(resultado_bayes))
+                    st.progress(float(resultado_bayes))"""
                     
                     # Interpretación
                     if resultado_bayes < 0.3:
@@ -267,7 +267,7 @@ def main():
                 nuevo_vector = vectorizer.transform([texto_limpio])
                 proba = clf.predict_proba(nuevo_vector)[0][1]
                 
-                # Mostrar resultados
+                """# Mostrar resultados
                 st.subheader("Resultados del Análisis de Texto")
                 col1, col2 = st.columns(2)
                 with col1:
@@ -276,7 +276,7 @@ def main():
                     if proba >= 0.5:
                         st.error("El modelo detecta posibles indicios de depresión")
                     else:
-                        st.success("El modelo no detecta indicios significativos de depresión")
+                        st.success("El modelo no detecta indicios significativos de depresión")"""
                 
                 # Guardar resultado en session state
                 st.session_state.resultado_tweet = proba
