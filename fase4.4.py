@@ -221,11 +221,11 @@ def main():
                     with col2:
                         st.metric("Likelihood Ratio Orientación", f"{lr_orientacion:.2f}")
                     with col3:
-                        st.metric("Likelihood Ratio Genético", f"{lr_genetico:.2f}")"""
+                        st.metric("Likelihood Ratio Genético", f"{lr_genetico:.2f}")
                     
                    # Mostrar probabilidad final con barra de progreso
                     st.metric("Probabilidad Final de Riesgo", f"{resultado_bayes:.4f}")
-                    st.progress(float(resultado_bayes))"""
+                    st.progress(float(resultado_bayes))
                     
                     # Interpretación
                     if resultado_bayes < 0.3:
